@@ -1,0 +1,130 @@
+MENU = {
+    "espresso": {
+        "ingredients": {
+            "water": 50,
+            "milk": 0,
+            "coffee": 18,
+        },
+        "cost": 1.5,
+    },
+    "latte": {
+        "ingredients": {
+            "water": 200,
+            "milk": 150,
+            "coffee": 24,
+        },
+        "cost": 2.5,
+    },
+    "cappuccino": {
+        "ingredients": {
+            "water": 250,
+            "milk": 100,
+            "coffee": 24,
+        },
+        "cost": 3.0,
+    }
+}
+
+resources = {
+    "water": 300,
+    "milk": 200,
+    "coffee": 100,
+}
+
+
+# print(MENU["espresso"]["ingredients"]["water"])
+# refill the coffee machine and take the profit
+def refill_machine():
+    """Refills the coffee machine with resources & erases the money (back to 0)"""
+    refill_again = {
+        "water": 300,
+        "milk": 200,
+        "coffee": 100,
+        "money": 0,
+    }
+    return refill_again
+
+
+# machine resources:
+machine_resources = refill_machine()
+
+
+# Requirement 3
+def report():
+    """Reports how many resources are left in stock"""
+    print(f"Water: {machine_resources['water']}ml")
+    print(f"Milk: {machine_resources['milk']}ml")
+    print(f"Coffee: {machine_resources['coffee']}g")
+    print(f"Money: {machine_resources['money']}$")
+
+
+machine_operational = True
+
+
+# Requirement 4
+def resources_sufficient(coffee_input):
+    """Checks if the coffee machine has enough resources to produce the selected coffee"""
+    order_needs = MENU[coffee_input]["ingredients"]
+    missing_products = []
+    for ingredient in order_needs:
+        if order_needs[ingredient] > machine_resources[ingredient]:
+            missing_products.append(ingredient)
+    return missing_products
+
+
+# Requirement 5
+def money_collector():
+    """Returns how money the user has inserted to the coffee machine"""
+    print("Please insert coins.")
+    money_inserted = 0
+    coins = {
+        "quarters": 0.25,
+        "dimes": 0.1,
+        "nickles": 0.05,
+        "pennies": 0.01}
+    for coin in coins:
+        x = float(input(f"how many {coin}?"))
+        money_inserted += x*coins[coin]
+    return money_inserted
+
+
+def stock_update(coffee):
+    """Updates the stock after coffee was served"""
+    machine_resources['water'] -= MENU[coffee]['ingredients']['water']
+    machine_resources['milk'] -= MENU[coffee]['ingredients']['milk']
+    machine_resources['coffee'] -= MENU[coffee]['ingredients']['coffee']
+
+
+while machine_operational:
+    # Requirement 1
+    print(machine_resources)
+    costumers_choice = input("What would you like? (espresso / latte / cappuccino): ")
+
+    # Requirement 2
+    if costumers_choice == "off":
+        machine_operational = False
+        print("Coffee Machine out of order")
+    elif costumers_choice == "report":
+        report()
+    elif costumers_choice == "refill":
+        machine_resources = refill_machine()
+    else:
+        we_need_supplies = resources_sufficient(costumers_choice)
+        if we_need_supplies:
+            for missing_product in we_need_supplies:
+                print(f"Sorry there is not enough {missing_product}.")
+        else:
+            money_required_to_buy_coffee = MENU[costumers_choice]["cost"]
+            money_inserted = money_collector()
+            if money_required_to_buy_coffee > money_inserted:
+                print("Sorry that's not enough money. Money refunded")
+            elif money_required_to_buy_coffee == money_inserted:
+                machine_resources['money'] += money_required_to_buy_coffee
+                stock_update(costumers_choice)
+                print(f"Here is your {costumers_choice}. Enjoy!")
+            else:
+                change = round(money_inserted - money_required_to_buy_coffee, 2)
+                machine_resources['money'] += money_required_to_buy_coffee
+                stock_update(costumers_choice)
+                print(f"Here is ${change} in change.")
+                print(f"Here is your {costumers_choice}. Enjoy!")
